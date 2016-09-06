@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+
+var qs = require('query-string');
+
+function parse(queryString) {
+  return JSON.stringify(qs.parse(queryString));
+}
+
+function stringify(queryStringObject) {
+  return qs.stringify(JSON.parse(queryStringObject));  
+}
+
+var querystring = { parse, stringify };
+var method = process.argv[2];
+var argument = process.argv[3];
+
+console.log(querystring[method](argument));

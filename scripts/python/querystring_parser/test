@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+from querystring_parser import parser
+from querystring_parser import builder
+import sys
+import json
+
+def parse(queryString):
+  return json.dumps(parser.parse(queryString))
+
+def stringify(queryStringObject):
+  return builder.build(json.loads(queryStringObject))
+
+method = sys.argv[1]
+argument = sys.argv[2]
+
+print(globals()[method](argument))

@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+function parse($queryString) {
+  parse_str($queryString, $output);
+  return json_encode($output);
+}
+
+function stringify($queryStringObject) {
+  return http_build_query(json_decode($queryStringObject));
+}
+
+$method = $argv[1];
+$argument = $argv[2];
+
+echo $method($argument) . "\n";
+?>

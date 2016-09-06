@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require "rack"
+require "json"
+
+def parse(queryString)
+  Rack::Utils.parse_nested_query(queryString).to_json
+end
+
+def stringify(queryStringObject)
+  Rack::Utils.build_nested_query(JSON.parse(queryStringObject))
+end
+
+method = ARGV[0]
+argument = ARGV[1]
+
+puts send(method, argument)
