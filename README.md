@@ -58,3 +58,7 @@ This effort is being spearheaded by [Nathan Hammond](https://twitter.com/nathanh
 > ...this is a problem complex enough to justify having one well-thought-out community solution. It's not the easy stuff that needs to be standardized, it's the hard stuff. The whole point of Ember is to identify that kind of problem and solve it together. Even though general solutions are harder to find than one-off "it works for me" solutions, it is massively more valuable in the long run. -[Edward Faulkner](https://github.com/emberjs/rfcs/pull/143#issuecomment-244612714)
 
 We look forward to the day when users of HTTP are able to blithely ignore the minutae of URL processing and how that impacts the applications that they build.
+
+## License & Copyright Information
+
+CC0-1.0. Applicable to all assets inside of this repository.

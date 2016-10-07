@@ -1,0 +1,23 @@
+{
+  "name": "query-string-spec",
+  "version": "0.1.0",
+  "description": "Query string specification.",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nathanhammond/query-string-spec.git"
+  },
+  "keywords": [
+    "query string",
+    "specification",
+    "spec"
+  ],
+  "author": "Nathan Hammond",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/nathanhammond/query-string-spec/issues"
+  },
+  "homepage": "https://github.com/nathanhammond/query-string-spec#readme"
+}
