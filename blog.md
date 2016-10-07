@@ -1,12 +1,14 @@
 # Query Strings
 
-Query strings are used in literally every web application but there is no particular standard behavior for how they function. It has long been assumed that the variance in strategies meant that attempting a grand unified query string specification is foolish:
+[Every time you've ever performed a search on Google](https://www.google.com/?q=query+string) you've used a query string. If you've ever built a website with `<form method="get">` you've used query strings. They've been [codified to exist since the dawn of HTTP](https://www.ietf.org/rfc/rfc1738.txt). You've possibly even been asked to parse a query string as an interview question.
+
+In spite of their prevalence you may also have been told that every single web framework implements them differently; that the variance in strategies meant that attempting a grand unified query string specification is foolish:
 
 > There are simply too many different implementations and too many permutations to account for!
 
-This is actually a falsehood we tell ourselves to make ourselves feel better about not undertaking this effort. There are three primary serialization and deserialization strategies which have emerged and any query string library should support all three.
+Instinctively we _want_ for this to be true. Edge cases are _hard_. Even the lack of any serious attempts over the past twenty years to attempt to specify query string behavior implies the difficulty of the task.
 
-But first, why is this area so steeped in convention rather than specification?
+But simply being hard doesn't make the effort futile. Why is this area so steeped in convention rather than specification?
 
 ## What is a query string?
 
@@ -37,12 +39,12 @@ Serialization is the concept of taking the canonical state and reducing it to so
 - The serialization and deserialization process should be efficient (time and space).
 - The serialized format should be as small as possible.
 - The serialized format may need to provide a reasonable user interface.
- 
+
 If you check most of those boxes you've achieved a great serialization format. JSON is widely used because of how well it fits these attributes. XML is mocked for its space inefficiency–though in its base format it has the ability to achieve higher information fidelity. Almost all serialization formats make tradeoffs to achieve different goals which helps to explain why we have so many different formats.
 
 <a href="https://xkcd.com/927/"><img src="https://imgs.xkcd.com/comics/standards.png" title="Fortunately, the charging one has been solved now that we've all standardized on mini-USB. Or is it micro-USB? Shit." alt="Standards"></a>
 
-But it's the application of serialization and deserialization with differing mental models which helps to explain the three distinct approaches to query string handling.
+But it's the application of serialization and deserialization with differing mental models which helps to explain the three distinct approaches to query string handling. There are three primary serialization and deserialization strategies which have emerged but none of those  and any query string library should support all three.
 
 ## Mental Models
 
@@ -295,7 +297,7 @@ By the time all of the information has been turned into a query string we lose a
 - `number`
 - `true` and `false`
 - `null`
- 
+
 All of these values are supported by JSON and should have a specification as to what their expected behavior is to allow libraries to produce useful values.
 
 ###### Numbers
@@ -303,22 +305,22 @@ All of these values are supported by JSON and should have a specification as to 
 Numbers should be turned into strings on serialization. On deserialization, fields of only numeric characters should remain strings and the consuming application should correctly handle type transformation.
 
 - `{"num": 1234}` => `"num=1234"`
-- `"num=1234"` => `{"num": "1234"}`
- 
+- `"num=1234"` => `{"num": "1234"}` 
+
 ###### Booleans
 
 Booleans should be turned into strings on serialization. The string `"1"` maps to `true` and the string `"0"` maps to `false`. On deserialization these should remain strings and the consuming application should correctly handle type transformation.
 
 - `{"truthy": true, "falsey": false}` => `"truthy=1&falsey=0"`
-- `"truthy=1&falsey=0"` => `{"truthy": "1", "falsey": "0"}`
- 
+- `"truthy=1&falsey=0"` => `{"truthy": "1", "falsey": "0"}` 
+
 ###### Null
 
 `null` values should be serialized to just having their key present in the output. Naked keys in the serialized form should be set back to `null`. If you wish to not have a key present in the output you must remove it from the object prior to serialization.
 
 - `{"key": null}` => `"key"`
-- `"key"` => `{"key": null}`
- 
+- `"key"` => `{"key": null}` 
+
 ##### Empty Strings
 
 Empty strings turn out to be one of the trickier edge cases to handle correctly. Both keys and values may be set to an empty string.
@@ -326,8 +328,8 @@ Empty strings turn out to be one of the trickier edge cases to handle correctly.
 - `{"key": ""}` => `"key="`
 - `"key="` => `{"key": ""}`
 - `{"": "value"}` => `"=value"`
-- `"=value"` => `{"": "value"}`
- 
+- `"=value"` => `{"": "value"}` 
+
 ##### Multiple Key Occurrences
 
 Considering that the canonical form for this mental model is a JSON object, this is an edge case that most libraries will not encounter as it can only come from manual or improper serialization. However, behavior to handle it should be consistent. The value of the _last_ occurrence of the key is what the key should be set to.
@@ -371,6 +373,7 @@ var serialized = "colors[foreground]=orange&colors[background]=rebeccapurple"
 ##### Edge Cases
 
 The most obvious edge case is serializing a key which contains `[` or `]`. To support this we require that all square brackets be escaped 
+
 - `{"[markdownlink]": "fragment"}` => `%5Bmarkdownlink%5D=fragment`
 
 You _may not_ sort keys during the deserialization process as that removes information about key ordering. If the application desires sorted key ordering this must be done before corssing the boundary into the query string library as it is an application concern.
@@ -409,11 +412,13 @@ a["1"] === 1; // => true
 Using only square brackets without indices has the tradeoff that a user may reorder keys in a way that results in an additional item being inserted into an array (by not having all array keys adjacent in the query string). If so, this manual manipulation is incorrect. Since manual manipulation is the only way this can go wrong the application should treat it the same as a validation error in which the user provides incorrect data. 
 
 **PHP**
+
 - **Serialize**: `{"a": ["one", [1,2,3], "three"]}` => `a[0]=one&a[1][0]=1&a[1][1]=2&a[1][2]=3&a[2]=three`
 - **Deserialize (PHP)**: `a[0]=one&a[1][0]=1&a[1][1]=2&a[1][2]=3&a[2]=three` => `{"a": ["one", [1,2,3], "three"]}`
 - **Deserialize (Rack)**: `a[]=one&a[][]=1&a[][]=2&a[][]=3&a[]=three` => `{"a": ["one", ["1"], ["2"], ["3"], "three"]}`
 
 **Rack**
+
 - **Serialize**: `{"a": ["one", [1,2,3], "three"]}` => `a[]=one&a[][]=1&a[][]=2&a[][]=3&a[]=three`
 - **Deserialize (Rack)**: `a[]=one&a[][]=1&a[][]=2&a[][]=3&a[]=three` => `{"a": ["one", null, null, null, "three"]}`
 - **Deserialize (PHP)**: `a[0]=one&a[1][0]=1&a[1][1]=2&a[1][2]=3&a[2]=three` => `{"a": {"0": "one","1": {"0": "1", "1": "2", "2": "3"}, "2": "three"}}`
@@ -436,15 +441,17 @@ Sparse arrays are unsupported as they are not able to be represented in JSON.
 For nested objects keys should be assigned and added to the key stack. If an object is a child of an array its key may be either numeric or empty square brackets and should work correctly.
 
 **PHP**
+
 - `{"a": ["one", {"two": 2}, "three"]}` => `a[0]=one&a[1][two]=2&a[2]=three`
 - `a[0]=one&a[1][two]=2&a[2]=three` => `{"a": ["one", {"two": 2}, "three"]}`
 
 **Rack**
+
 - `{"a": ["one", {"two": 2}, "three"]}` => `a[]=one&a[][two]=2&a[]=three`
 - `a[]=one&a[][two]=2&a[]=three` => `{"a": ["one", {"two": 2}, "three"]}`
 
 ---
- 
+
 ### Less Common Strategies
 
 There are a few unique implementations that exist clustered in the space of annotations within the value assigned to a key, sometimes in pair with special notation in the key as well to trigger even more complex serialization and deserialization strategies. This is categorically wrong. Storing your data's structure between key and value violates expectations. Further, customization of approaches has significant drawbacks in terms of interoperability and limiting representation of values.
@@ -470,23 +477,23 @@ To ensure that we actually specify common behavior and aren't building "yet anot
 ##### [`org.apache.http.client.utils.URLEncodedUtils`](https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/client/utils/URLEncodedUtils.html)
 
 - Pattern: Simplistic
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### [`android.net.Uri`](https://developer.android.com/reference/android/net/Uri.html)
 
 - Pattern: Collapsing
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### [`javax.servlet.ServletRequest`](http://docs.oracle.com/javaee/1.3/api/javax/servlet/ServletRequest.html)
 
 - Pattern: Collapsing
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### [`org.springframework.web.util.UriComponentsBuilder`](http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/util/UriComponentsBuilder.html)
 
 - Pattern: Collapsing
-- Character Set: ?
- 
+- Character Set: ? 
+
 #### JavaScript
 
 ##### [qs npm module](https://www.npmjs.com/package/qs)
@@ -494,43 +501,43 @@ To ensure that we actually specify common behavior and aren't building "yet anot
 Most specifically used by [`Express`](https://expressjs.com/).
 
 - Pattern: Nested
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### [Node.js Standard Library](https://nodejs.org/api/querystring.html)
 
 - Pattern: Collapsing
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### [query-string npm module](https://github.com/sindresorhus/query-string)
 
 - Pattern: Collapsing
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### [`jQuery.param`](http://api.jquery.com/jquery.param/)
 
 This is, by rule, the client-side standard with [approximately 70% usage across the top 100,000 websites](http://trends.builtwith.com/javascript/jQuery). *It does not implement a deserializer.*
 
 - Pattern: Nested
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### Ember.js
 
 - Pattern: Custom value introspection.
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### route-recognizer
 
 - Pattern: Single-level nested.
-- Character Set: ?
- 
+- Character Set: ? 
+
 #### Ruby
 
 ##### [Rack](http://rack.github.io/)
 
 - Pattern: Nested
 - Character Set: ?
-- [Implementation](https://github.com/rack/rack/blob/master/lib/rack/query_parser.rb)
- 
+- [Implementation](https://github.com/rack/rack/blob/master/lib/rack/query_parser.rb) 
+
 #### PHP
 
 ##### Standard Library
@@ -538,8 +545,8 @@ This is, by rule, the client-side standard with [approximately 70% usage across 
 Includes [`parse_str`](http://php.net/manual/en/function.parse-str.php) and [`http_build_query`](http://php.net/manual/en/function.http-build-query.php) in the standard library.
 
 - Pattern: Nested
-- Character Set: ?
- 
+- Character Set: ? 
+
 #### Python
 
 ##### Standard Library
@@ -547,10 +554,9 @@ Includes [`parse_str`](http://php.net/manual/en/function.parse-str.php) and [`ht
 Includes [`urlparse.parse_qs`](https://docs.python.org/2/library/urlparse.html#urlparse.parse_qs) and [`urlparse.parse_qsl`](https://docs.python.org/2/library/urlparse.html#urlparse.parse_qsl).
 
 - Pattern: Collapsing
-- Character Set: ?
- 
+- Character Set: ? 
+
 ##### [`querystring_parser`](https://github.com/bernii/querystring-parser).
 
 - Pattern: Nested
 - Character Set: ?
- 
