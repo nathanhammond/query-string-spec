@@ -1,10 +1,10 @@
 # Query String Specification
 
-To this point there has been no standardization of how a query string library is supposed to work. This test suite exists to make it possible to deliver a query string library which is fully interoperable with any other implementation which also supports this specification.
+To this point there has been no standardization of how a query string library is supposed to work. This specification and test suite exists to make it possible to deliver a query string library which is fully interoperable with any other implementation which also supports this specification.
 
-To try and move every existing system to this specification seems, generously, hubristic. However, the number of systems interacting with each other over HTTP has ballooned to the point where interoperability has become paramount. Specifying the behavior of those systems in their corner cases becomes a task of tremendous importance to prevent virtually undetectable bugs from appearing within the complex systems which build on top of a "simple" query string parser.
+To try and move every existing system to this specification seems, generously, hubristic. However, the number of systems interacting with each other over HTTP has ballooned to the point where interoperability has become paramount. Specifying the behavior of those systems in their edge cases becomes a task of tremendous importance to prevent virtually undetectable bugs from appearing within the complex systems which build on top of a "simple" query string parser.
 
-To identify what this specification should be lots of research was done as to the existing behavior in the ecosystem. This is a specification by consensus, not by fiat.
+To identify what this specification should be lots of research was done as to the existing behavior in the web ecosystem. This is a specification by consensus, not by fiat.
 
 ## Reporting Issues
 
@@ -14,9 +14,9 @@ Reporting issues with the specification can be done via GitHub issues. _All issu
 
 _Please do not open issues against your favorite libraries if they do not happen to pass this test suite._
 
-There are two ways to run the specification tests. The first is to use the built-in harness inside of this repository which were used during the initial ecosystem survey. The second is to write your own harness and import the tests themselves into your own test suite.
+There are two ways to run the specification tests. The first is to use the built-in harness inside of this repository which were used during the initial ecosystem survey and write a test adapter. The second is to write your own harness and import the tests themselves into your own test suite.
 
-### Writing an Adapter
+### Writing a Test Adapter
 
 Your adapter must be invocable with this pattern:
 
@@ -25,7 +25,6 @@ $ ./test [method] [strategy] [teststring]
 ```
 
 - `method` must be one of `stringify` or `parse`.
-- `strategy` must be one of `simplistic`, `collapsing`, or `nested`.
 - `teststring` will be:
   - a string when invoking `parse`.
   - a serialized JSON object when invoking `stringify`.
@@ -42,8 +41,6 @@ The tests are listed as a six-element tuple and themselves serialized into JSON.
  - a string identifer.
 2. `method`:
   - one of `stringify` or `parse`.
-2. `strategy`:
-  - one of `simplistic`, `collapsing`, or `nested`.
 3. `teststring`: 
   - a string when `method` is `parse`.
   - a serialized JSON object when `method` is `stringify`.
