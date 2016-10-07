@@ -97,7 +97,7 @@ Multiple occurrences of the same key do nothing special. Notation inside of the 
 
 #### Serialization
 
-When serializing from a keyed data structure it is impossible to achieve this output. It must be serialized from an array of key/value tuples. This is a data structure which is easy to achieve in any language.
+When serializing from a keyed data structure it is impossible to achieve an output that matches the above input because of key collisions. It must instead be serialized from an array of key/value tuples. This is a data structure which is easy to achieve in any language.
 
 ``` javascript
 var deserialized = [
@@ -129,15 +129,15 @@ var serialized = serialize(deserialized);
 serialized === "yo=dawg&yo=yodawg&yo=&=1&present&maybe%5B%5D=1&maybe%5B%5D=2";
 ```
 
-These are clearly operations which fully reverse each other in a lossless manner. Order remains consistent, keys and values remain consistent. This achieves the ideal for all serialization and deserialization algorithms but it does not, however, make it easy to work with the query string.
+These are clearly operations which fully reverse each other in a lossless manner. Order remains consistent, keys and values remain consistent. This achieves the ideal for all serialization and deserialization algorithms but it does not, however, make it easy to work with the query string. The application developer will have to consistently scan the array of tuples to identify what the application should do.
 
 ### Collapsing
 
-In a slight modification to the simplistic approach, there is a modified deserialization pattern which moves all of the items of the same key into a single key space. This collapsing allows for the in-memory representation to be a keyed data structure and makes it a bit easier to work with the data as you needn't iterate over all key/value tuples prior to processing.
+In a slight modification to the simplistic approach, there is a modified deserialization pattern which moves all of the items of the same key into a single key space. This collapsing allows for the in-memory representation to be a keyed data structure and makes it a bit easier to work with the data as an application developer needn't iterate over all key/value tuples prior to use inside of an application.
 
 #### Deserialization
 
-There is still no introspection into the keys themselves, but the values are collapsed into arrays.
+There is still no introspection into the keys themselves, it is done blindly. Collapsing occurs if the keys match and the values are stored in arrays at that particular key.
 
 ``` javascript
 var serialized = "yo=dawg&yo=yodawg&yo=&=1&present&maybe%5B%5D=1&maybe%5B%5D=2";
@@ -153,7 +153,7 @@ function deserialize(serialized) {
       tuple.push(null);
     }
 
-    // MODIFIED FROM ABOVE:
+    // MODIFIED FROM SIMPLISTIC:
     var key = tuple[0];
     var value = tuple[1];
 
@@ -253,10 +253,10 @@ var queryString = "yo=dawg&yo=yodawg&present";
 queryString === serialize(deserialize(queryString)); // true
 
 queryString = "yo=dawg&present&yo=yodawg";
-queryString !== serialize(deserialize(queryString)); // true
+queryString === serialize(deserialize(queryString)); // false
 ```
 
-This is because value ordering ends up being hoisted to the _first_ occurrence of the key in the query string. If key/value pair order is important you _must_ use the simplistic strategy. If ordering of values within a single key is the only concern or not a concern then you may choose to use the collapsing strategy.
+This is because value ordering ends up being hoisted to the _first_ occurrence of the key in the query string. If key/value pair order is important you _must_ use the simplistic strategy. If ordering of values within a single key is the only concern or not a concern then you may choose to use the collapsing strategy. This also works well for "read-only" patterns where you don't need to modify and then re-serialize the query string.
 
 ### Nested
 
@@ -558,3 +558,7 @@ Includes [`urlparse.parse_qs`](https://docs.python.org/2/library/urlparse.html#u
 
 - Pattern: Nested
 - Character Set: ?
+
+---
+
+Special thanks to Matthew Beale, Miguel Camba, and Trent Willis for reviewing drafts of this post.
