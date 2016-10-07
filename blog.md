@@ -8,11 +8,11 @@ In spite of their prevalence you may also have been told that every single web f
 
 Instinctively we _want_ for this to be true. Edge cases are _hard_. Even the lack of any serious attempts over the past twenty years to attempt to specify query string behavior implies the difficulty of the task.
 
-But simply being hard doesn't make the effort futile. Why is this area so steeped in convention rather than specification?
+Simply being hard doesn't make the effort futile. Why is this area so steeped in convention rather than specification?
 
 ## What is a query string?
 
-There are two ways to read [RFC 3986](https://www.ietf.org/rfc/rfc3986.txt) which defines a generic syntax for URIs to figure out what a query string is. The first way to approach it is to read it as specified in the [ABNF](https://en.wikipedia.org/wiki/Augmented_Backus%E2%80%93Naur_Form):
+There are two ways to read [RFC 3986](https://www.ietf.org/rfc/rfc3986.txt) which defines a generic syntax for URIs and specifies how to identify a query string. The first way to approach it is to read it as specified in the [ABNF](https://en.wikipedia.org/wiki/Augmented_Backus%E2%80%93Naur_Form):
 
 ``` 
 unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
@@ -23,13 +23,13 @@ pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
 query = *( pchar / "/" / "?" )
 ```
 
-This definition *dramatically* limits the values allowed in a query string. This is also far less than ideal–it ends up encoding a large portion of characters in URIs unnecessarily. Most modern implementations fully support Unicode characters inside of URIs–making encoding characters almost entirely superfluous.
+This definition _dramatically_ limits the characters allowed in a query string. This is less than ideal in a world in which ISO-8859-1 is unable to represent the way in which the majority of the world communicates. Given that most modern implementations of URL parsers fully support Unicode characters inside of URIs this definition is far too strict–it ends up unnecessarily encoding a large portion of characters in URIs.
 
-The other approach presented in the same document is that a query string is nothing more than the portion of a URL which matches this regular expression: `/\?([^#]*)/`. This is presented as only applying to well-formed URIs matching the ABNF, but in practice it has meant that the defining feature of a query string is its boundary characters: `?` and `#`.
+The other approach–_presented in the same document_–is that a query string is nothing more than the portion of a URI which matches this regular expression: `/\?([^#]*)/`. This is presented as only applying to well-formed URIs matching the ABNF but in practice has meant that the defining feature of a query string is its boundary characters: `?` and `#`.
 
-All modern implementations should use the boundary character interpretation unless they have strict compatibility requirements for integrating with legacy systems which do not support the broader character set.
+All modern implementations should use the boundary character interpretation unless they have strict compatibility requirements for integrating with legacy systems which do not support a broader character set.
 
-How query string libraries handle what happens between these boundary characters is actually the most intriguing part. But, before we analyze the approaches, we should take a moment to detour through the topic of serialization and deserialization.
+And that is a summary of the extent to which query strings are officially specified. Nothing about ampersands, equal signs, or key/value pairs. It's the lack of further specification which makes the rules for how query string libraries handle serialization and deserialization between these boundary characters the most intriguing part.
 
 ## Serialization & Deserialization
 
