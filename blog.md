@@ -48,11 +48,9 @@ It's the application of serialization and deserialization to query strings with 
 
 ## Mental Models
 
-I posit that the fundamental distinction between the approaches in handling query strings can be dissolved into an analysis of the library's attitude toward what state should be considered the canonical state. If the library author treats the query string as provided in the URL as the canonical state they will provide a series of manipulation functions whose consequences are string modification. There *may not be* a serialized format in this approach, just helper functions to make it easier to interact with the query string.
+I posit that the fundamental distinction between the approaches in handling query strings can be dissolved into an analysis of the library's attitude toward which state should be considered the canonical state. If the library author treats the query string as provided in the URL as the canonical state they will provide a series of manipulation functions whose consequences are string modification. This can take the form of functions like `addParameter(key, value)` which simply appends to the existing string. In this approach there *may not be* a serialized format, just helper functions to make it easier to interact with the query string.
 
-The second mental model is to treat the query string as the serialized state and have a (much more complex) in-memory object as the canonical state. This mental model and approach is common in more-dynamic languages such as Ruby and JavaScript. It also maps remarkably well onto JSON as an in-memory format which is commonly found in these languages.
-
-That there are three common implementation strategies and only two separate mental models is for reasons of pragmatism in implementation of the string manipulation tools when the query string is treated as the canonical state.
+The second mental model is to treat the query string as the serialized state and have a (much more complex) in-memory object as the canonical state. This mental model and approach is common in more-dynamic languages such as Ruby and JavaScript. It also maps remarkably well onto JSON as an in-memory format which is commonly used in these languages.
 
 ## Implementation Strategies
 
