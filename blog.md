@@ -33,18 +33,18 @@ And that is a summary of the extent to which query strings are officially specif
 
 ## Serialization & Deserialization
 
-Serialization is the concept of taking the canonical state and reducing it to something that can be stored and reconstructed (deserialized) later. There are really only a few features that matter in serialization:
+Serialization is the process of taking the canonical state of a data structure and reducing it to something (often a string) which can be stored and reconstructed (deserialized) later. There are really only a few features that matter in serialization:
 
-- The serialized format should be lossless. Serializing an object to a string and then deserializing that string back into an object should ideally be idempotent.
-- The serialization and deserialization process should be efficient (time and space).
-- The serialized format should be as small as possible.
-- The serialized format may need to provide a reasonable user interface.
+- The serialized format should be lossless. Serialization and deserialization should ideally be idempotent: `X === D(S(X))`.
+- The processing for serialization and deserialization should be efficient. It should limit processing costs along time and memory axes.
+- The serialized state should be as small as possible.
+- The serialized format should possibly provide a reasonable human user interface.
 
-If you check most of those boxes you've achieved a great serialization format. JSON is widely used because of how well it fits these attributes. XML is mocked for its space inefficiency–though in its base format it has the ability to achieve higher information fidelity. Almost all serialization formats make tradeoffs to achieve different goals which helps to explain why we have so many different formats.
+If you check most of those boxes you've achieved a great serialization format. JSON is widely used as a serialization format because of how well it fits these attributes. XML is also used for serialization yet often mocked for its space inefficiency–though in its base format it has the ability to achieve higher information fidelity. Almost all serialization formats make tradeoffs to achieve different goals–which helps to explain why we have so many different formats.
 
 <a href="https://xkcd.com/927/"><img src="https://imgs.xkcd.com/comics/standards.png" title="Fortunately, the charging one has been solved now that we've all standardized on mini-USB. Or is it micro-USB? Shit." alt="Standards"></a>
 
-But it's the application of serialization and deserialization with differing mental models which helps to explain the three distinct approaches to query string handling. There are three primary serialization and deserialization strategies which have emerged but none of those  and any query string library should support all three.
+It's the application of serialization and deserialization to query strings with differing mental models which helps to explain the distinct approaches to query string handling.
 
 ## Mental Models
 
