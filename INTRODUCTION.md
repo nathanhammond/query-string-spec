@@ -1,6 +1,6 @@
 # Query Strings
 
-[Every time you've ever performed a search on Google](https://www.google.com/?q=query+string) you've used a query string. If you've ever built a website with `<form method="get">` you've used query strings. They've been [codified to exist since the dawn of HTTP](https://www.ietf.org/rfc/rfc1738.txt). You've possibly even been asked to parse a query string as an interview question.
+[Every time you've ever performed a search on Google](https://www.google.com/?q=query+string) you've used a query string. If you've ever built a website with `<form method="get">` you've used query strings. They've been [codified to exist since the dawn of HTTP](https://www.ietf.org/rfc/rfc1738.txt). And you've possibly even been asked to write a function to parse a query string during a tech company whiteboard interview.
 
 In spite of their prevalence you may also have been told that every single web framework implements them differently; that the variance in strategies meant that attempting a grand unified query string specification is foolish:
 
@@ -44,7 +44,22 @@ If you check most of those boxes you've achieved a great serialization format. J
 
 <a href="https://xkcd.com/927/"><img src="https://imgs.xkcd.com/comics/standards.png" title="Fortunately, the charging one has been solved now that we've all standardized on mini-USB. Or is it micro-USB? Shit." alt="Standards"></a>
 
-It's the application of serialization and deserialization to query strings with differing mental models which helps to explain the distinct approaches to query string handling.
+## Why Standardize?
+
+Rather than attempting to describe it better, I'll borrow a quote from a different topic which describes the need perfectly:
+
+> ...this is a problem complex enough to justify having one well-thought-out community solution. It's not the easy stuff that needs to be standardized, it's the hard stuff. The whole point of Ember is to identify that kind of problem and solve it together. Even though general solutions are harder to find than one-off "it works for me" solutions, it is massively more valuable in the long run. -[Edward Faulkner](https://github.com/emberjs/rfcs/pull/143#issuecomment-244612714)
+
+Currently it is all too easy to get tripped up in query string serialization when building applications. They're just deceptively simple enough that libraries don't account for edge cases. For example, in every single shipped Ember application there are at least three incompatible query string libraries, but likely more:
+
+- jQuery ships with [`$.param`](http://api.jquery.com/jquery.param/). This implementation presently suffers from [at least one known bug](https://github.com/jquery/jquery/issues/3286) and its behavior doesn't match _any_ deserialization library.
+- [route-recognizer](https://github.com/tildeio/route-recognizer) includes simplistic [deserialization](https://github.com/tildeio/route-recognizer/blob/51e823bdc46a945c433c967edb8e672531fd2f60/lib/route-recognizer.js#L455-L483) and [serialization](https://github.com/tildeio/route-recognizer/blob/51e823bdc46a945c433c967edb8e672531fd2f60/lib/route-recognizer.js#L423-L453) behavior. It accounts for escaping very effectively but interestingly only supports nested objects to one level deep.
+- Meanwhile, inside of Ember itself, query strings are [serialized](https://github.com/emberjs/ember.js/blob/e340677ca739c09d78b9000a8cb6b72a4baee756/packages/ember-routing/lib/system/route.js#L408-L416) by calling `toString` on the item unless it is an array, in which case the entire object is passed through `JSON.stringify`. [Deserialization](https://github.com/emberjs/ember.js/blob/e340677ca739c09d78b9000a8cb6b72a4baee756/packages/ember-routing/lib/system/route.js#L427-L442) also follows its own custom behavior which converts objects to types based upon application configuration.
+- And then there is likely a separate server implementation for each service you interact with which doesn't match any of these behaviors.
+
+These incompatibilities may at first seem like mere edge cases which you are unlikely to run into and are able to work around. In reality these manifest as the rare [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) which intermittently show up as a runaway process on your search server which you have to wake up and kill at 3:00am on a Saturday morning. All because you didn't include tests for interplay of your query string libraries in your application's test suite–which nobody should have to do.
+
+So instead we develop mental models around how query strings function and use that to describe to ourselves how applications will work having never seen the implementations. It's the application of serialization and deserialization to query strings with differing mental models which helps to explain the distinct approaches to query string handling.
 
 ## Mental Models
 
